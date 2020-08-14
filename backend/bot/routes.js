@@ -50,8 +50,17 @@ export const dialogflowWebhook = functions.https.onRequest((async (request, resp
     }
 
     function changeBase(agent) {
-        console.log(agent)
-        agent.add(`Base has been changed`)
+        const { queryResult } = request.body
+        console.log(queryResult.parameters)
+
+        const number = queryResult.parameters['number']
+        const targetBase = queryResult.parameters['target-base']
+        const currentBase = queryResult.parameters['current-base']
+
+        console.log(number, currentBase, targetBase)
+
+        const changedNumber = changeBase(number, currentBase, targetBase)
+        agent.add(`${number} on conversion from ${currentBase} to ${targetBase} gives ${changedNumber}`)
     }
 
     let intentMap = new Map()
