@@ -7,11 +7,14 @@ import "firebase/firestore";
 import * as firebaseConfig from '../../firebase.json'
 import * as serviceAccountConfig from '../../firebaseServiceAcct.json'
 
-firebase.initializeApp(firebaseConfig);
-
-(function setUpServiceAcct() {
+function setUpServiceAcct() {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccountConfig),
         databaseURL: "https://chatbot-8510b.firebaseio.com"
     })
-})()
+}
+
+export const firebaseInit = () => {
+    firebase.initializeApp(firebaseConfig);
+    setUpServiceAcct()
+}
