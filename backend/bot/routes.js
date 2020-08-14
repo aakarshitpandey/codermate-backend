@@ -3,6 +3,7 @@ import { SessionsClient } from 'dialogflow'
 import * as serviceAccount from '../../firebaseServiceAcct.json'
 import request from 'request'
 import cheerio from 'cheerio'
+import { WebhookClient } from 'dialogflow-fulfillment'
 
 const cors = require('cors')({ origin: true })
 
@@ -34,6 +35,30 @@ export const dialogFlowGateway = functions.https.onRequest((request, response) =
         }
     })
 })
+
+export const dialogflowWebhook = functions.https.onRequest((async (request, response) => {
+    const agent = new WebhookClient({ request, response })
+
+    console.log(JSON.stringify(request.body))
+
+    function welcome(agent) {
+        agent.add(`Hey there! How may I help you?`)
+    }
+
+    function fallback(agent) {
+        agent.add(`Sorry, can you try that again?`)
+    }
+
+    function changeBase(agent) {
+        console.log(agent)
+        agent.add(`Base has been changed`)
+    }
+
+    let intentMap = new Map()
+    intentMap.set('Default Welcome Intent', welcome)
+    intentMap.set('Default Fallback Intent', fallback)
+    intentMap.set('Change Base Intent', changeBase)
+}))
 
 export const scraper = functions.https.onRequest((req, res) => {
     cors(req, res, async () => {
