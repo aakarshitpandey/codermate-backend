@@ -8,16 +8,29 @@ const cors = require('cors')({ origin: true })
 
 export const dialogFlowGateway = functions.https.onRequest((request, response) => {
     cors(request, response, async () => {
-        const { queryInput, sessionId } = request.body
-        const sessionClient = new SessionsClient({ credentials: serviceAccount })
-        const session = sessionClient.sessionPath('chatbot-8510b', sessionId)
         try {
-            const responses = await sessionClient.detectIntent({ session, queryInput })
-            const result = responses[0].queryResult
-            response.send(result)
+            const { text } = request.query
+            const queryInput = {
+                text: {
+                    text,
+                    languageCode: 'en-us'
+                }
+            }
+            const sessionId = 'foo'
+            console.log(queryInput, sessionId)
+            const sessionClient = new SessionsClient({ credentials: serviceAccount })
+            const session = sessionClient.sessionPath('chatbot-8510b', sessionId)
+            try {
+                const responses = await sessionClient.detectIntent({ session, queryInput })
+                const result = responses[0].queryResult
+                response.send(result)
+            } catch (e) {
+                console.log(e)
+                response.json({ msg: e.message })
+            }
         } catch (e) {
             console.log(e)
-            response.json({ msg: e.message })
+            response.status(200).json({ fulfillmentMessages: [{ text: { text: ['Sorry, what is it again?'] } }] })
         }
     })
 })
@@ -27,7 +40,7 @@ export const scraper = functions.https.onRequest((req, res) => {
         functions.logger.info('Scraping stack overflow')
         request('https://stackoverflow.com/questions?tab=Newest', (error, response, html) => {
             let arr = []
-            if (!error && response.statusCode == 200) {
+            if (!error && response.statusCode === 200) {
                 const $ = cheerio.load(html);
                 const questions = $('.summary')
                 questions.each((i, el) => {

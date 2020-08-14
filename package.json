@@ -65,5 +65,9 @@
     "last 3 opera versions",
     "last 3 ios_saf versions",
     "last 3 safari versions"
-  ]
+  ],
+  "devDependencies": {
+    "eslint": "^7.6.0",
+    "eslint-plugin-promise": "^4.2.1"
+  }
 }
