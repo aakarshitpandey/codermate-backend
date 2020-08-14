@@ -4,6 +4,7 @@ import * as serviceAccount from '../../firebaseServiceAcct.json'
 import request from 'request'
 import cheerio from 'cheerio'
 import { WebhookClient } from 'dialogflow-fulfillment'
+import { changeBaseOfNumber } from './utils'
 
 const cors = require('cors')({ origin: true })
 
@@ -59,7 +60,7 @@ export const dialogflowWebhook = functions.https.onRequest((async (request, resp
 
         console.log(number, currentBase, targetBase)
 
-        const changedNumber = changeBase(number, currentBase, targetBase)
+        const changedNumber = changeBaseOfNumber(number, currentBase, targetBase)
         agent.add(`${number} on conversion from ${currentBase} to ${targetBase} gives ${changedNumber}`)
     }
 
@@ -67,6 +68,7 @@ export const dialogflowWebhook = functions.https.onRequest((async (request, resp
     intentMap.set('Default Welcome Intent', welcome)
     intentMap.set('Default Fallback Intent', fallback)
     intentMap.set('Change Base Intent', changeBase)
+    agent.handleRequest(intentMap)
 }))
 
 export const scraper = functions.https.onRequest((req, res) => {

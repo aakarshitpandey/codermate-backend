@@ -1,4 +1,4 @@
-export const changeBase = (number, currentBase, targetBase) => {
+export const changeBaseOfNumber = (number, currentBase, targetBase) => {
     const map = {
         'binary': 2,
         'octal': 8,
