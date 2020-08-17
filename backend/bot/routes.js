@@ -61,13 +61,38 @@ export const dialogflowWebhook = functions.https.onRequest((async (request, resp
         console.log(number, currentBase, targetBase)
 
         const changedNumber = changeBaseOfNumber(number, currentBase, targetBase)
+        if (isNaN(changedNumber)) {
+            agent.add(`I'm afraid but it doesn't look like the conversion can be performed`)
+            return
+        }
         agent.add(`${number} on conversion from ${currentBase} to ${targetBase} gives ${changedNumber}`)
+    }
+
+    function redirectionUrl(agent) {
+        const { queryResult } = request.body
+        let query = queryResult.parameters['query']
+        query = `${query}`.trim()
+        if (query.startsWith('https://') || query.startsWith('http://') || query.startsWith('www.')) {
+            agent.add('/redirect:' + `${query}`.split('')[0])
+        } else {
+            query = `${query}`.replace(' ', '+')
+            agent.add('/redirect:' + `https://google.com/search?q=${query}`)
+        }
+    }
+
+    function youtubeSearch(agent) {
+        const { queryResult } = request.body
+        let query = queryResult.parameters['query']
+        query = `${query}`.trim().replace(' ', '+')
+        agent.add('/redirect:' + `https://www.youtube.com/results?search_query=${query}`)
     }
 
     let intentMap = new Map()
     intentMap.set('Default Welcome Intent', welcome)
     intentMap.set('Default Fallback Intent', fallback)
     intentMap.set('Change Base Intent', changeBase)
+    intentMap.set('Web Search', redirectionUrl)
+    intentMap.set('Youtube search', youtubeSearch)
     agent.handleRequest(intentMap)
 }))
 
@@ -76,6 +101,7 @@ export const scraper = functions.https.onRequest((req, res) => {
         functions.logger.info('Scraping stack overflow')
         request('https://stackoverflow.com/questions?tab=Newest', (error, response, html) => {
             let arr = []
+            console.log(error, request)
             if (!error && response.statusCode === 200) {
                 const $ = cheerio.load(html);
                 const questions = $('.summary')
